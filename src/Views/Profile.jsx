@@ -6,7 +6,9 @@ function Profile() {
   const [user, setUser] = useState();
   const getProfile = async () => {
     const config = {
-      url: `http://localhost:3000/api/users/${localStorage.getItem("ID")}`,
+      url: `${
+        import.meta.env.VITE_BACKEND_ENDPOINT
+      }/users/${localStorage.getItem("ID")}`,
       method: "GET",
     };
 

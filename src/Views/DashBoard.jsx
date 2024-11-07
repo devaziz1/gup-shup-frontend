@@ -30,7 +30,7 @@ const Dashboard = () => {
   return (
     <div className="flex">
       <div
-        className={`fixed inset-y-0  left-0 bg-blue-100   p-4 transition-transform transform ${
+        className={`fixed inset-y-0 left-0 bg-blue-100 p-4 transition-all transform ease-in-out duration-300 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         } md:relative md:translate-x-0 md:col-span-3 md:block`}
       >
@@ -51,7 +51,7 @@ const Dashboard = () => {
               <div className="mt-2">{option.icon}</div>
               <li
                 key={option.name}
-                className={`p-2 rounded-md font-semibold  cursor-pointer w-44 ${
+                className={`p-2 rounded-md font-semibold cursor-pointer w-44 transition-all ease-in-out duration-300 ${
                   active === option.name
                     ? "bg-blue-200 mt-1"
                     : "hover:bg-blue-200 mt-1"

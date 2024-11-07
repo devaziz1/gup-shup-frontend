@@ -14,9 +14,10 @@ const Blog = () => {
 
   const getBlogbyID = async () => {
     const config = {
-      url: `http://localhost:3000/api/Blog/getBlogById/${id}`,
+      url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/Blog/getBlogById/${id}`,
       method: "GET",
     };
+
 
     try {
       const response = await axios(config);

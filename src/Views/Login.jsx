@@ -23,7 +23,7 @@ const Login = () => {
     setIsButtonLoading(true);
 
     const config = {
-      url: "http://localhost:3000/api/users/login",
+      url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/users/login`,
       method: "POST",
       data: {
         email,

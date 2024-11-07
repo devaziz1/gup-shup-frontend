@@ -24,7 +24,7 @@ const SignUp = () => {
     setIsButtonLoading(true);
 
     const config = {
-      url: "http://localhost:3000/api/users/",
+      url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/users/`,
       method: "POST",
       data: {
         name,

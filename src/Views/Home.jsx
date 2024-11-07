@@ -21,7 +21,9 @@ const Home = () => {
   const getBlogsData = async () => {
     setIsLoading(true); // Set loading state to true
     const config = {
-      url: `http://localhost:3000/api/Blog/getAllBlogs?page=${page}`, // Pass the page number
+      url: `${
+        import.meta.env.VITE_BACKEND_ENDPOINT
+      }/Blog/getAllBlogs?page=${page}`, // Pass the page number
       method: "GET",
     };
 
@@ -56,7 +58,7 @@ const Home = () => {
     }
 
     const config = {
-      url: `http://localhost:3000/api/Blog/like/${blogID}`,
+      url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/Blog/like/${blogID}`,
       method: "PATCH",
     };
 
