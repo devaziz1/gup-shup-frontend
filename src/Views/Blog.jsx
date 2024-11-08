@@ -1,23 +1,34 @@
-import { Card, Divider, Input, Skeleton } from "antd";
+import { Card, Divider, Form, Input, Modal, Skeleton, Button } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
-import { SendIcon, UserIcon } from "../assets/Icons/Icons";
+import {
+  SendIcon,
+  UserIcon,
+  DeleteIcon,
+  EditIcon,
+  CloseCircleIcon,
+} from "../assets/Icons/Icons";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import HtmlRender from "../utils/HtmlRender";
+import { validationRules } from "../utils/Validation";
 
 const Blog = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [blogData, setBlogData] = useState();
   const [comments, setComments] = useState({});
+  const [updatedComment, setUpdatedComment] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const currentUser = localStorage.getItem("ID");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [IsButtonLoading, setIsButtonLoading] = useState(false);
+  const [form] = Form.useForm();
 
   const getBlogbyID = async () => {
     const config = {
       url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/Blog/getBlogById/${id}`,
       method: "GET",
     };
-
 
     try {
       const response = await axios(config);
@@ -32,6 +43,70 @@ const Blog = () => {
     }
   };
 
+  const deleteComment = async (id) => {
+    const config = {
+      url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/blog/deleteComment`,
+      method: "Delete",
+      data: {
+        commentId: id,
+      },
+    };
+
+    try {
+      const response = await axios(config);
+      console.log(response.data);
+
+      getBlogbyID();
+    } catch (error) {
+      console.error("Error :", error);
+    } finally {
+      console.log("Inside finally");
+    }
+  };
+
+  const editComment = (id, content) => {
+    console.log("Inside editComment");
+
+    setUpdatedComment({ id, content });
+    form.setFieldValue("comment", content);
+    setIsEditModalOpen(true);
+  };
+
+  const CancelEditModal = () => {
+    setIsEditModalOpen(false);
+    form.setFieldValue("comment", "");
+  };
+
+  const handleEditCommentSubmit = async () => {
+    setIsButtonLoading(true);
+    console.log("Inside update Comment On Blog API Call");
+    const config = {
+      url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/Blog/editComment`,
+      method: "Patch",
+      data: {
+        commentId: updatedComment.id,
+        content: updatedComment.content,
+      },
+    };
+
+    try {
+      const response = await axios(config);
+      console.log(response.data);
+      getBlogbyID();
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    } finally {
+      setIsButtonLoading(false);
+      setIsEditModalOpen(false);
+      console.log("Inside finally");
+    }
+  };
+
+  const isBlogLiked = (blogID) => {
+    const likes = JSON.parse(localStorage.getItem("likes")) || [];
+    return likes.includes(blogID);
+  };
+
   const likeBlog = async (blogID) => {
     const likes = JSON.parse(localStorage.getItem("likes")) || [];
 
@@ -41,7 +116,7 @@ const Blog = () => {
     }
 
     const config = {
-      url: `http://localhost:3000/api/Blog/like/${blogID}`,
+      url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/Blog/like/${blogID}`,
       method: "PATCH",
     };
 
@@ -64,7 +139,7 @@ const Blog = () => {
     console.log("Inside Comment On Blog API Call");
     console.log(blogId, content);
     const config = {
-      url: `http://localhost:3000/api/Blog/addComment`,
+      url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/Blog/addComment`,
       method: "POST",
       data: {
         name: localStorage.getItem("name")
@@ -124,31 +199,7 @@ const Blog = () => {
             </h3>
           </div>
           <div></div>
-          {localStorage.getItem("auth") === "true" ? (
-            <button
-              type="button"
-              onClick={() => navigate("/dashboard/Stats")}
-              className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 p-2 rounded-md px-2 font-semibold"
-            >
-              Dashboard
-            </button>
-          ) : (
-            <div className="flex gap-3 items-center">
-              <button
-                onClick={() => navigate("/login")}
-                className="font-semibold"
-              >
-                Login
-              </button>
-              <button
-                type="button"
-                onClick={() => navigate("/signup")}
-                className="text-white bg-gradient-to-r from-cyan-500 to-blue-500 p-2 rounded-md px-2 font-semibold"
-              >
-                Get Started
-              </button>
-            </div>
-          )}
+          <div></div>
         </nav>
       </header>
 
@@ -188,7 +239,9 @@ const Blog = () => {
                     <div className="mt-1 ml-1 flex gap-1 items-center">
                       <svg
                         viewBox="0 0 1024 1024"
-                        fill="currentColor"
+                        fill={
+                          isBlogLiked(blogData._id) ? "red" : "currentColor"
+                        }
                         className="w-5 h-5 cursor-pointer"
                         onClick={() => likeBlog(blogData._id)}
                       >
@@ -214,12 +267,37 @@ const Blog = () => {
                   <h4 className="flex justify-center font-medium">Comments</h4>
 
                   {blogData.comments.map((comment) => (
-                    <div key={comment._id}>
-                      {comment.name}
-                      {": "}
-                      {comment.content}
+                    <div
+                      key={comment._id}
+                      className="flex justify-between items-center space-x-2 mb-2"
+                    >
+                      <span>
+                        <strong>{comment.name}</strong>: {comment.content}
+                      </span>
+
+                      {blogData.user._id === currentUser && (
+                        <div className="">
+                          <button
+                            onClick={() =>
+                              editComment(comment._id, comment.content)
+                            }
+                            className="text-blue-500 hover:text-blue-700 mr-1"
+                            aria-label="Edit comment"
+                          >
+                            <EditIcon />
+                          </button>
+                          <button
+                            onClick={() => deleteComment(comment._id)}
+                            className="text-red-500 hover:text-red-700"
+                            aria-label="Delete comment"
+                          >
+                            <DeleteIcon />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
+
                   <div className="flex justify-between items-center gap-2">
                     <Input
                       variant="borderless"
@@ -233,12 +311,15 @@ const Blog = () => {
                     />
                     <div
                       className="mt-2 cursor-pointer"
-                      onClick={() =>
-                        handleCommentChange(
-                          blogData._id,
-                          comments[blogData._id]
-                        )
-                      }
+                      onClick={() => {
+                        if (comments[blogData._id]) {
+                          CommentOnBlog(blogData._id, comments[blogData._id]);
+                          setComments({
+                            ...comments,
+                            [blogData._id]: "",
+                          });
+                        }
+                      }}
                     >
                       <SendIcon />
                     </div>
@@ -249,6 +330,76 @@ const Blog = () => {
           </>
         )}
       </main>
+      <Modal
+        open={isEditModalOpen}
+        onCancel={CancelEditModal}
+        closeIcon={false}
+        footer={false}
+        width={800}
+        centered
+      >
+        <Form form={form} onFinish={handleEditCommentSubmit}>
+          <div className="grid grid-cols-12 justify-center gap-3">
+            <div className="col-span-12 flex justify-between  w-full mb-5">
+              <div></div>
+              <h3 className="text-xl font-semibold">Edit Comment</h3>
+              <div onClick={CancelEditModal} className="cursor-pointer">
+                <CloseCircleIcon />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-12 col-span-12 ">
+              <div className="col-span-12 flex flex-col gap-3 md:px-16 lg:px-24 mt-4">
+                <div className="col-span-12 md:col-span-7 ">
+                  <Form.Item
+                    initialValue={updatedComment.content}
+                    name="comment"
+                    rules={validationRules.comment}
+                  >
+                    <Input
+                      value={updatedComment.content}
+                      onChange={(e) =>
+                        setUpdatedComment({
+                          ...updatedComment,
+                          content: e.target.value,
+                        })
+                      }
+                      placeholder="Enter Comment"
+                      allowClear
+                    />
+                  </Form.Item>
+                </div>
+
+                <div className="flex gap-2 mt-5 col-span-12 justify-center">
+                  <Button
+                    style={{
+                      fontWeight: 600,
+                    }}
+                    type="primary"
+                    className="rounded-full"
+                    onClick={CancelEditModal}
+                    ghost
+                  >
+                    Cancel
+                  </Button>
+
+                  <Button
+                    style={{
+                      fontWeight: 600,
+                    }}
+                    htmlType="submit"
+                    type="primary"
+                    className="rounded-full "
+                    loading={IsButtonLoading}
+                  >
+                    Update
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Form>
+      </Modal>
     </>
   );
 };

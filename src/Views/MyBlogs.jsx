@@ -164,6 +164,28 @@ const MyBlogs = () => {
     setPage(page);
   };
 
+  const deleteComment = async (id) => {
+    const config = {
+      url: `${import.meta.env.VITE_BACKEND_ENDPOINT}/blog/deleteComment`,
+      method: "Delete",
+      data: {
+        commentId: id,
+      },
+    };
+
+    try {
+      const response = await axios(config);
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error :", error);
+    } finally {
+      setIsViewModalOpen(false);
+      getBlogCount();
+      getBlogByUser();
+      console.log("Inside finally");
+    }
+  };
+
   // ------- search ------------
   const SearchBar = async (title) => {
     const config = {
@@ -887,13 +909,23 @@ const MyBlogs = () => {
                   <h4 className="flex justify-center font-medium">Comments</h4>
 
                   {blog.comments.map((comment) => (
-                    <div key={comment._id}>
-                      {comment.name}
-                      {": "}
-                      {comment.content}
+                    <div
+                      key={comment._id}
+                      className="flex justify-between items-center space-x-2 mb-2"
+                    >
+                      <span>
+                        <strong>{comment.name}</strong>: {comment.content}
+                      </span>
+
+                      <button
+                        onClick={() => deleteComment(comment._id)}
+                        className="text-red-500 hover:text-red-700"
+                        aria-label="Delete comment"
+                      >
+                        <DeleteIcon />
+                      </button>
                     </div>
                   ))}
-                  
                 </Card>
               </>
             )}

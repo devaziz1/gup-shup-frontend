@@ -49,6 +49,11 @@ const Home = () => {
     setPage(pageNum);
   };
 
+  const isBlogLiked = (blogID) => {
+    const likes = JSON.parse(localStorage.getItem("likes")) || [];
+    return likes.includes(blogID);
+  };
+
   const likeBlog = async (blogID) => {
     const likes = JSON.parse(localStorage.getItem("likes")) || [];
 
@@ -198,7 +203,9 @@ const Home = () => {
                           <div className="mt-1 ml-1 flex gap-1 items-center">
                             <svg
                               viewBox="0 0 1024 1024"
-                              fill="currentColor"
+                              fill={
+                                isBlogLiked(blog._id) ? "red" : "currentColor"
+                              }
                               className="w-5 h-5 cursor-pointer"
                               onClick={() => likeBlog(blog._id)}
                             >

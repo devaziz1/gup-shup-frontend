@@ -29,7 +29,7 @@ export const validationRules = {
     },
   ],
 
-    passwordLogin: [
+  passwordLogin: [
     {
       required: true,
       message: "Password is required",
@@ -48,15 +48,19 @@ export const validationRules = {
 
   title: [
     { required: true, message: "Title is required" },
-    { max: 40, message: "Name must be at most 40 characters long" },
-    { min: 1, message: "Name must be at least 1 characters long" },
+    { max: 40, message: "Title must be at most 40 characters long" },
+    { min: 1, message: "Title must be at least 1 characters long" },
+  ],
+
+  comment: [
+    { required: true, message: "Comment is required" },
+    { max: 40, message: "comment must be at most 40 characters long" },
+    { min: 1, message: "comment must be at least 1 characters long" },
   ],
 
   descrption: [
     { required: true, message: "Content is required" },
-    { max: 200, message: "Name must be at most 200 characters long" },
-    { min: 1, message: "Name must be at least 1 characters long" },
+    { max: 200, message: "Content must be at most 200 characters long" },
+    { min: 1, message: "Content must be at least 1 characters long" },
   ],
-
-  
 };
