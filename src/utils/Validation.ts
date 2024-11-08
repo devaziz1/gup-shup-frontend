@@ -15,18 +15,7 @@ export const validationRules = {
     },
     { max: 40, message: "Password must be at most 40 characters long" },
     { min: 6, message: "Password must be at least 6 characters long" },
-    {
-      validator: (_, value) => {
-        if (!/[a-z]/.test(value) || !/[A-Z]/.test(value)) {
-          return Promise.reject(
-            new Error(
-              "Password must contain at least one uppercase and one lowercase character"
-            )
-          );
-        }
-        return Promise.resolve();
-      },
-    },
+    
   ],
 
   passwordLogin: [

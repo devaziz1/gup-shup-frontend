@@ -1,4 +1,4 @@
-import React from "react";
+
 import { SendOutlined } from "@ant-design/icons";
 import Icon from "@ant-design/icons";
 
