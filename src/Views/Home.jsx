@@ -10,6 +10,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
+  const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(1);
   const [blogData, setBlogData] = useState({
     blogs: [],
@@ -19,11 +20,11 @@ const Home = () => {
   });
 
   const getBlogsData = async () => {
-    setIsLoading(true); // Set loading state to true
+    setIsLoading(true); 
     const config = {
       url: `${
         import.meta.env.VITE_BACKEND_ENDPOINT
-      }/Blog/getAllBlogs?page=${page}`, // Pass the page number
+      }/Blog/getAllBlogs?page=${page}&limit=${limit}`,
       method: "GET",
     };
 
@@ -38,10 +39,10 @@ const Home = () => {
         currentPage: response.data.currentPage,
       });
 
-      setIsLoading(false); // Set loading state to false
+      setIsLoading(false); 
     } catch (error) {
       console.error("Error fetching blogs:", error);
-      setIsLoading(false); // Ensure loading state is turned off on error
+      setIsLoading(false); 
     }
   };
 
@@ -244,6 +245,7 @@ const Home = () => {
                   <Pagination
                     className="mb-5 mt-5 col-start-4 md:col-start-6 col-span-6 flex items-end"
                     current={page}
+                    pageSize={limit}
                     total={blogData.totalBlogs}
                     onChange={handlePageChange}
                   />

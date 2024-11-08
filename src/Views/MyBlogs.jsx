@@ -52,7 +52,6 @@ const MyBlogs = () => {
   const [tags, setTags] = useState("");
   const [blog, setBlog] = useState();
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState("");
   const [selectedBlogID, setSelectedBlogID] = useState("");
   const [sort, setSort] = useState("latest");
   const [searchValue, setSearchValue] = useState("");
@@ -228,7 +227,6 @@ const MyBlogs = () => {
     formData.append("title", title);
     formData.append("tags", tags);
     formData.append("content", editorContent);
-    formData.append("category", category);
     formData.append("username", localStorage.getItem("name"));
     if (image) {
       formData.append("image", image);
@@ -247,9 +245,13 @@ const MyBlogs = () => {
       const response = await axios(config);
       console.log("Blog submitted successfully!");
       console.log(response.data);
+      setTitle("");
+      setContent("");
+      setImage();
       form.setFieldValue("title", "");
       form.setFieldValue("content", "");
-      form.setFieldValue("Category", "");
+      form.setFieldValue("tags", "");
+      setEditorContent("");
       getBlogCount();
       getBlogByUser();
       openNotification("Blog created successfully!");
@@ -284,7 +286,7 @@ const MyBlogs = () => {
     setTitle(blog.title);
     setTags(blog.tags);
     setContent(blog.description);
-    setCategory(blog.category);
+
     form.setFieldValue("Etitle", blog.title);
     form.setFieldValue("Econtent", blog.description);
     form.setFieldsValue("tags", blog.tags);
@@ -314,7 +316,7 @@ const MyBlogs = () => {
       setTitle("");
       setTags("");
       setContent("");
-      setCategory("");
+
       form.setFieldValue("Etitle", "");
       form.setFieldsValue("Econtent", "");
       form.setFieldsValue("Ecategory", "");
@@ -705,7 +707,7 @@ const MyBlogs = () => {
                     <Editor
                       apiKey="2e93k9pcsd46l2bwuh2241llbj8mjr0b5c8c39w9nga6upav"
                       onInit={(_evt, editor) => (editorRef.current = editor)}
-                      initialValue=""
+                      initialValue={editorContent}
                       placeholder="Enter Blog Content Here..."
                       onEditorChange={(newContent) =>
                         setEditorContent(newContent)
