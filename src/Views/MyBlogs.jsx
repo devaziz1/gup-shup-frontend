@@ -56,9 +56,7 @@ const MyBlogs = () => {
   const [selectedBlogID, setSelectedBlogID] = useState("");
   const [sort, setSort] = useState("latest");
   const [searchValue, setSearchValue] = useState("");
-  const [editorContent, setEditorContent] = useState(
-    "<p>This is the initial content of the editor.</p>"
-  );
+  const [editorContent, setEditorContent] = useState("");
   const [image, setImage] = useState();
   const fileInputRef = useRef(null);
 
@@ -132,15 +130,14 @@ const MyBlogs = () => {
 
     try {
       const response = await axios(config);
-      console.log("Blogs by user ID");
+      console.log("Blogs by user ID...");
       console.log(response.data);
 
       const transformedBlogs = response.data.blogs.map((blog) => ({
         id: blog._id,
         title: blog.title,
-        category: blog.category,
+        tags: blog.tags.join(", "),
         description: blog.content,
-        Status: blog.hide ? "hide" : "unhide",
         CreatedAt: blog.createdAt,
       }));
 
@@ -278,7 +275,8 @@ const MyBlogs = () => {
   };
 
   const showEditModal = () => {
-    console.log("Inside Second function");
+    console.log("current tags");
+    console.log(tags);
     console.log("Selected blog:", selectedBlogID);
     const blog = blogData.blogs.find((blog) => blog.id === selectedBlogID);
     console.log("Blog found");
@@ -289,7 +287,7 @@ const MyBlogs = () => {
     setCategory(blog.category);
     form.setFieldValue("Etitle", blog.title);
     form.setFieldValue("Econtent", blog.description);
-    form.setFieldsValue("Ecategory", blog.category);
+    form.setFieldsValue("tags", blog.tags);
     setIsEditModalOpen(true);
   };
 
@@ -302,8 +300,8 @@ const MyBlogs = () => {
       data: {
         blogId: selectedBlogID,
         title,
-        content,
-        category,
+        content: editorContent,
+        tags,
       },
       headers: {
         Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -624,32 +622,39 @@ const MyBlogs = () => {
                 </div>
               </div>
 
-              {image ? (
-                <div className=" col-span-12   w-full">
-                  <div
-                    onClick={resetImage}
-                    className="  flex justify-end mb-1 cursor-pointer"
-                  >
-                    <CloseCircleIcon />
+              <Form.Item
+                className="col-span-12"
+                name="image"
+                rules={[
+                  {
+                    validator: (_, value) =>
+                      image
+                        ? Promise.resolve()
+                        : Promise.reject(new Error("Cover Image is required")),
+                  },
+                ]}
+              >
+                {image ? (
+                  <div className="col-span-12 w-full">
+                    <div
+                      onClick={resetImage}
+                      className="flex justify-end mb-1 cursor-pointer"
+                    >
+                      <CloseCircleIcon />
+                    </div>
+                    <img
+                      className="w-full h-[400px] object-contain"
+                      src={URL.createObjectURL(image)}
+                      alt="Uploaded"
+                    />
                   </div>
-                  <img
-                    className="w-full h-[400px] object-contain  "
-                    src={URL.createObjectURL(image)}
-                    alt="Uploaded"
-                  />
-                </div>
-              ) : (
-                <Form.Item
-                  className="col-span-12"
-                  name="image"
-                  rules={validationRules.Image}
-                >
+                ) : (
                   <div
                     style={{
                       border: "1px dashed black",
                     }}
                     onClick={handleButtonClick}
-                    className=" cursor-pointer  rounded-md  h-[100px]  opacity-40 text-center text-xs flex flex-col justify-center items-center  gap-3"
+                    className="cursor-pointer rounded-md h-[100px] opacity-40 text-center text-xs flex flex-col justify-center items-center gap-3"
                   >
                     <ImageIcon />
                     Tap To Add <br />
@@ -657,14 +662,13 @@ const MyBlogs = () => {
                     <input
                       style={{ display: "none" }}
                       ref={fileInputRef}
-                      className="ml-2"
                       type="file"
                       accept="image/*"
                       onChange={handleImageChange}
                     />
                   </div>
-                </Form.Item>
-              )}
+                )}
+              </Form.Item>
 
               <div className="grid grid-cols-12 col-span-12 ">
                 <div className="col-span-12 flex flex-col gap-3 md:px-16 lg:px-24 mt-4">
@@ -701,7 +705,8 @@ const MyBlogs = () => {
                     <Editor
                       apiKey="2e93k9pcsd46l2bwuh2241llbj8mjr0b5c8c39w9nga6upav"
                       onInit={(_evt, editor) => (editorRef.current = editor)}
-                      initialValue="<p>Blog Content.</p>"
+                      initialValue=""
+                      placeholder="Enter Blog Content Here..."
                       onEditorChange={(newContent) =>
                         setEditorContent(newContent)
                       }
@@ -806,23 +811,59 @@ const MyBlogs = () => {
                     </Form.Item>
                   </div>
 
-                  <div className="col-span-7">
-                    <label className="text-sm ml-1 font-semibold">
-                      Enter Blog
+                  <div className="col-span-12 md:col-span-7 ">
+                    <label className=" text-sm ml-1 font-semibold">
+                      Blog Tags
                     </label>
-                    <Form.Item
-                      initialValue={content}
-                      name="Econtent"
-                      rules={validationRules.descrption}
-                    >
-                      <TextArea
-                        rows={4}
-                        placeholder="Enter Blog"
-                        onChange={(e) => setContent(e.target.value)}
-                        autoSize={{ minRows: 3, maxRows: 5 }}
+                    <Form.Item initialValue={tags} name="tags">
+                      <Input
+                        onChange={(e) => setTags(e.target.value)}
+                        placeholder="Blog Tags"
+                        allowClear
                       />
                     </Form.Item>
                   </div>
+
+                  <Editor
+                    apiKey="2e93k9pcsd46l2bwuh2241llbj8mjr0b5c8c39w9nga6upav"
+                    onInit={(_evt, editor) => (editorRef.current = editor)}
+                    initialValue={content}
+                    placeholder="Enter Blog Content Here..."
+                    onEditorChange={(newContent) =>
+                      setEditorContent(newContent)
+                    }
+                    init={{
+                      height: 500,
+                      menubar: false,
+                      plugins: [
+                        "advlist",
+                        "autolink",
+                        "lists",
+                        "link",
+                        "image",
+                        "charmap",
+                        "preview",
+                        "anchor",
+                        "searchreplace",
+                        "visualblocks",
+                        "code",
+                        "fullscreen",
+                        "insertdatetime",
+                        "media",
+                        "table",
+                        "code",
+                        "help",
+                        "wordcount",
+                      ],
+                      toolbar:
+                        "undo redo | blocks | " +
+                        "bold italic forecolor | alignleft aligncenter " +
+                        "alignright alignjustify | bullist numlist outdent indent | " +
+                        "removeformat | help",
+                      content_style:
+                        "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                    }}
+                  />
 
                   <div className="flex gap-2 mt-5 col-span-12 justify-center">
                     <Button
@@ -902,6 +943,15 @@ const MyBlogs = () => {
                   <div className="mt-2 ml-1 text-base font-medium">
                     {blog.title}
                   </div>
+                  {blog.tags && blog.tags.length > 0 && (
+                    <div className="mt-2 flex gap-2 flex-wrap">
+                      {blog.tags.map((tag, index) => (
+                        <span key={index} style={{ color: "#1E90FF" }}>
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="mt-2 ml-1 text-base ">
                     <HtmlRender htmlContent={blog.content} />
                   </div>

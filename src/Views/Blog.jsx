@@ -260,6 +260,15 @@ const Blog = () => {
                   <div className="mt-2 ml-1 text-base font-medium">
                     {blogData.title}
                   </div>
+                  {blogData.tags && blogData.tags.length > 0 && (
+                    <div className="mt-2 flex gap-2 flex-wrap">
+                      {blogData.tags.map((tag, index) => (
+                        <span key={index} style={{ color: "#1E90FF" }}>
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="mt-2 ml-1 text-base ">
                     <HtmlRender htmlContent={blogData.content} />
                   </div>

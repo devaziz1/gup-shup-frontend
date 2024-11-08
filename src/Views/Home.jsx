@@ -221,6 +221,15 @@ const Home = () => {
                         >
                           {blog.title}
                         </div>
+                        {blog.tags && blog.tags.length > 0 && (
+                          <div className="mt-2 flex gap-2 flex-wrap">
+                            {blog.tags.map((tag, index) => (
+                              <span key={index} style={{ color: "#1E90FF" }}>
+                                #{tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                         <HtmlRender htmlContent={blog.content} />
                       </Card>
                     ))}
